@@ -1,0 +1,25 @@
+{
+    "Records":
+    [
+        {
+            "EventSource": "aws:sns",
+            "EventSubscriptionArn": "arn:aws:sns:us-west-2:643705676985:lp-prod-reconciliation-response:1afd21b3-1918-4a58-b446-4afdb8183122",
+            "EventVersion": "1.0",
+            "Sns":
+            {
+                "Message": "\n{\"HLSS30___2.0\": \"Sent: 3969. Total diff: 0 = missing: 0 + failed: 0\", \"HLSL30___2.0\": \"Sent: 1012860. Total diff: 18 = missing: 0 + failed: 18\"}\n\nDiscrepencies found comparing the report at lp-prod-reconciliation/submissions/reconciliation_reports/2022023/HLS_reconcile_2022023_historical_2.0.rpt with our database. Report available at lp-prod-reconciliation/reports/HLS_reconcile_2022023_historical_2.0.json.\n\nRetrieve via command line with: \"aws s3 cp s3://lp-prod-reconciliation/reports/HLS_reconcile_2022023_historical_2.0.json .\" or download from the AWS S3 console.\n\"",
+                "MessageAttributes":
+                {},
+                "MessageId": "0ae4ca16-6b52-5145-b21f-907fadd0c342",
+                "Signature": "iesS3GV+Zh5NfQQo39Gr9mI+cRUt+wLnLAODc8Ly4khR0k78IS/m9KYzf0187wCa+e0BOWS/vAuBw43vzclnMJebttPpITN8dhnTbvv8J0h3a6vL6GpiKH1Z7tjumrWEoyvMNfdv32uY7Nh2+0RGFoWWRXhfy8X3O993M1vaJMm2LmFRG3dABt+YopVjDOJWmUJE2CjJJyqXhYB5rNDKD9W9qycNfgLWO8nDGFxaCfS0tAmnXfaAORJE6FxvsTbENtIylm0agXRiZn/d3SK3PMF1olf2bTAWhxwP/WU1Ee8kSdbU8UN6XJYcaSv6cTn7XKAVNti3+CVRubzwp10HxA==",
+                "SignatureVersion": "1",
+                "SigningCertUrl": "https://sns.us-west-2.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem",
+                "Subject": "Rec-Report for lp-prod-reconciliation/submissions...HLS_reconcile_2022023_historical_2.0.rpt.",
+                "Timestamp": "2022-01-25T09:34:58.400Z",
+                "TopicArn": "arn:aws:sns:us-west-2:643705676985:lp-prod-reconciliation-response",
+                "Type": "Notification",
+                "UnsubscribeUrl": "https://sns.us-west-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-west-2:643705676985:lp-prod-reconciliation-response:1afd21b3-1918-4a58-b446-4afdb8183122"
+            }
+        }
+    ]
+}
