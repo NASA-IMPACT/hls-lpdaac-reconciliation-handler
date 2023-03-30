@@ -1,8 +1,8 @@
 import boto3
 import datetime
 import json
+import requests
 import sys
-import urllib3
 
 def check_in_s3(bucket, prefix):
     objs = s3Client.list_objects_v2(Bucket=bucket, Prefix=prefix)
@@ -24,12 +24,10 @@ def check_cmr(product_shortname, granule):
                    "HLSS30": "C2021957295-LPCLOUD"
                 }
     concept_id = concept_ids[product_shortname]
-    url = f"https://cmr.earthdata.nasa.gov/search/granules?collection_concept_id={concept_id}&readable_granule_name={granule}"
-    http = urllib3.PoolManager()
-    resp = http.request("GET", url).data.decode("utf-8")
+    url = f"https://cmr.earthdata.nasa.gov/search/granules.xml?collection_concept_id={concept_id}&readable_granule_name={granule}"
+    resp = requests.get(url).text
     hits = int(resp.split("<hits>")[1].split("</hits>")[0])
     if hits > 0:
-        print(f"{granule} is already available in CMR. Skipping.")
         return True
     return False
 
@@ -43,7 +41,10 @@ historical_bucket = "hls-global-v2-historical"
 
 s2_archive_bucket ="s2-archive"
 hls_s30_trigger_bucket= "hls-prod-sentinel-input-files"
-
+hls_s30_historical_trigger_bucket= "hls-prod-sentinel-input-files-historical"
+print(report_key)
+data_bucket = historical_bucket if "historical" in report_key else forward_bucket
+trigger_bucket = hls_s30_historical_trigger_bucket if "historical" in report_key else hls_s30_trigger_bucket
 s3Resource = boto3.resource("s3")
 s3Client = boto3.client("s3")
 obj = s3Resource.Object(bucket, report_key)
@@ -61,30 +62,35 @@ for prod_dict in json_object:
         for file in prod_dict[key]["report"]:
             file_objs = file.split(".")
             granule = ".".join(file_objs[:6]).strip("_stac")
-            data_bucket = historical_bucket if "historical" in report_key else forward_bucket
-            data_path = f"{file_objs[1]}/data/{file_objs[3][:7]}/{granule}/{granule}.json"
-            manifest = check_in_s3(data_bucket, data_path)
             if granule not in triggered_granules:
+                data_path = f"{file_objs[1]}/data/{file_objs[3][:7]}/{granule}/{granule}.json"
+                manifest = check_in_s3(data_bucket, data_path)
+                if manifest["KeyCount"] == 0:
+                    data_path = f"{file_objs[1]}/data/{file_objs[3][:7]}/{granule}/twin/{granule}.json"
+                    manifest = check_in_s3(data_bucket, data_path)
                 print(f"{granule} has a status of {prod_dict[key]['report'][file]['status']}.")
                 in_cmr = check_cmr(product_shortname, granule)
-                in_cmr = False
-                if in_cmr:
+                if in_cmr and prod_dict[key]['report'][file]['status'] not in ["queued"]:
                     triggered_granules.add(granule)
                 elif manifest.get("Contents", False):
+                    '''
                     copySource = {"Bucket": data_bucket, "Key": data_path}
                     s3Client.copy_object(Bucket=data_bucket, Key=data_path,
                             CopySource=copySource,
                             MetadataDirective="REPLACE"
                             )
+                    '''
                 elif product_shortname == "HLSS30":
+                    '''
                     files = find_source_file(granule)
                     for file in files:
                         archive_key = file["Key"]
                         s2_filename = archive_key.split("/")[-1]
                         copySource = {"Bucket": s2_archive_bucket,"Key": archive_key}
-                        s3Client.copy_object(Bucket=hls_s30_trigger_bucket, Key=s2_filename,
+                        s3Client.copy_object(Bucket=trigger_bucket, Key=s2_filename,
                                 CopySource=copySource
                                 )
+                    '''
                 elif product_shortname == "HLSL30" in key:
                     print("This is not finished")
                 triggered_granules.add(granule)
